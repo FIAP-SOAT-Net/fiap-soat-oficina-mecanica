@@ -156,34 +156,3 @@ jobs:
           push: true
           platforms: linux/amd64,linux/arm64
           tags: ${{ env.DOCKERHUB_USERNAME }}/${{ env.DOCKERHUB_REPOSITORY_NAME }}:latest
-
-  docker_db_publish:
-    name: DB | Build & Push Docker Image
-    runs-on: ubuntu-latest
-    needs: sonar
-    env:
-      DOCKERHUB_USERNAME: ${{ vars.DOCKERHUB_USERNAME }}
-      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
-      DOCKERHUB_DB_REPOSITORY_NAME: smart-mechanical-workshop-db
-    if: ${{ github.ref == 'refs/heads/main' && github.event_name == 'push' }}
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Login to DockerHub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ env.DOCKERHUB_USERNAME }}
-          password: ${{ env.DOCKERHUB_TOKEN }}
-
-      - name: Build and push Database Docker image
-        uses: docker/build-push-action@v5
-        with:
-          context: ./docker/mysql
-          file: ./docker/mysql/Dockerfile
-          push: true
-          platforms: linux/amd64,linux/arm64
-          tags: ${{ env.DOCKERHUB_USERNAME }}/${{ env.DOCKERHUB_DB_REPOSITORY_NAME }}:latest
