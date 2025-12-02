@@ -1,19 +1,24 @@
 using Fiap.Soat.SmartMechanicalWorkshop.Api.Shared.Extensions;
+using Fiap.Soat.SmartMechanicalWorkshop.Api.Shared.HealthChecks;
 using Fiap.Soat.SmartMechanicalWorkshop.Api.Shared.Middlewares;
 using Fiap.Soat.SmartMechanicalWorkshop.Application.Mappers;
 using Fiap.Soat.SmartMechanicalWorkshop.Application.Shared;
 using Fiap.Soat.SmartMechanicalWorkshop.Application.UseCases.ServiceOrders.Update;
 using Fiap.Soat.SmartMechanicalWorkshop.Domain.ValueObjects;
 using Fiap.Soat.SmartMechanicalWorkshop.Infrastructure.Data;
+using HealthChecks.UI.Client;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
+using Serilog.Context;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
 _ = builder.Host.UseSerilog((context, configuration) => configuration
     .ReadFrom.Configuration(context.Configuration)
-    .Enrich.FromLogContext());
+    .Enrich.FromLogContext()
+    .Enrich.WithProperty("Application", "SmartMechanicalWorkshop"));
 
 _ = builder.Logging.ClearProviders();
 _ = builder.Services.AddControllers();
@@ -38,7 +43,9 @@ _ = builder.Services.AddRepositoryExtensions();
 _ = builder.Services.AddAutoMapper(typeof(AutoMapperProfiles));
 _ = builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(UpdateServiceOrderStatusCommand).Assembly));
 _ = builder.Services.AddHttpContextAccessor();
-_ = builder.Services.AddHealthChecks();
+_ = builder.Services.AddHealthChecks()
+    .AddCheck<DetailedHealthCheck>("detailed")
+    .AddDbContextCheck<AppDbContext>("database");
 _ = builder.Services.AddRouting(options => options.LowercaseUrls = true);
 _ = builder.Services.AddAuthenticationExtension(builder.Configuration);
 _ = builder.Services.AddSwaggerExtension(builder.Configuration);
@@ -46,6 +53,8 @@ _ = builder.Services.AddMemoryCache();
 _ = builder.Services.AddInterfaceAdapters();
 
 var app = builder.Build();
+
+_ = app.UseMiddleware<RequestLoggingEnrichmentMiddleware>();
 
 _ = app.UseSwagger();
 _ = app.UseSwaggerUI(c =>
@@ -64,7 +73,10 @@ _ = app.UseMiddleware<ExceptionMiddleware>();
 _ = app.UseHttpsRedirection();
 _ = app.UseAuthorization();
 _ = app.MapControllers();
-_ = app.MapHealthChecks("/health");
+_ = app.MapHealthChecks("/health", new HealthCheckOptions
+{
+    ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
+});
 
 await app.RunAsync();
 

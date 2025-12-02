@@ -8,6 +8,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\..\src\Fiap.Soat.SmartMechanicalWorkshop.Domain\Fiap.Soat.SmartMechanicalWorkshop.Domain.csproj"/>
+        <ProjectReference Include="..\..\src\Fiap.Soat.SmartMechanicalWorkshop.Application\Fiap.Soat.SmartMechanicalWorkshop.Application.csproj"/>
     </ItemGroup>
 
     <ItemGroup>
