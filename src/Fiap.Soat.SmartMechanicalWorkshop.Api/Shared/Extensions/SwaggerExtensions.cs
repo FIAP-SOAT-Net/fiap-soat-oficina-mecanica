@@ -1,7 +1,9 @@
 using Microsoft.OpenApi.Models;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Fiap.Soat.SmartMechanicalWorkshop.Api.Shared.Extensions;
 
+[ExcludeFromCodeCoverage]
 public static class SwaggerExtensions
 {
     public static IServiceCollection AddSwaggerExtension(this IServiceCollection services, IConfiguration configuration)
