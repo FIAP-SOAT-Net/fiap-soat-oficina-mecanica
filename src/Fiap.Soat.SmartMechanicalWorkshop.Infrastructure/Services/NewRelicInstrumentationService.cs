@@ -2,9 +2,11 @@ using Fiap.Soat.SmartMechanicalWorkshop.Application.Adapters.Gateways.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using NewRelic.Api.Agent;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Fiap.Soat.SmartMechanicalWorkshop.Infrastructure.Services;
 
+[ExcludeFromCodeCoverage]
 public sealed class NewRelicInstrumentationService : INewRelicInstrumentationService
 {
     private readonly bool _enabled;

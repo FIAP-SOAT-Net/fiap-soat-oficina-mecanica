@@ -1,5 +1,8 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Fiap.Soat.SmartMechanicalWorkshop.Domain.ValueObjects;
 
+[ExcludeFromCodeCoverage]
 public record Document
 {
     private Document() { }

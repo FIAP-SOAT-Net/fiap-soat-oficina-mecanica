@@ -1,7 +1,9 @@
 using NewRelic.Api.Agent;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Fiap.Soat.SmartMechanicalWorkshop.Api.Shared.Services;
 
+[ExcludeFromCodeCoverage]
 public sealed class NewRelicTelemetryService : INewRelicTelemetryService
 {
     private readonly bool _isEnabled;
