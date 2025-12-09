@@ -55,6 +55,7 @@ _ = builder.Services.AddInterfaceAdapters();
 var app = builder.Build();
 
 _ = app.UseMiddleware<RequestLoggingEnrichmentMiddleware>();
+_ = app.UseMiddleware<NewRelicTransactionEnrichmentMiddleware>();
 
 _ = app.UseSwagger();
 _ = app.UseSwaggerUI(c =>

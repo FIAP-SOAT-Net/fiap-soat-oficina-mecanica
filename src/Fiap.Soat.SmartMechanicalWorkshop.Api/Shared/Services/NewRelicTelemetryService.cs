@@ -97,4 +97,60 @@ public sealed class NewRelicTelemetryService : INewRelicTelemetryService
             _logger.LogWarning(ex, "Failed to add custom attribute {Key}", key);
         }
     }
+
+    public void NoticeError(Exception exception, IDictionary<string, object>? attributes = null)
+    {
+        if (!_isEnabled)
+        {
+            return;
+        }
+
+        try
+        {
+            Task.Run(() =>
+            {
+                try
+                {
+                    NewRelic.Api.Agent.NewRelic.NoticeError(exception, attributes);
+                    _logger.LogDebug("Error noticed in New Relic: {ErrorMessage}", exception.Message);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to notice error in New Relic");
+                }
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to initiate error notice");
+        }
+    }
+
+    public void RecordServiceOrderMetrics(string status, TimeSpan duration, int servicesCount = 0)
+    {
+        if (!_isEnabled)
+        {
+            return;
+        }
+
+        try
+        {
+            // Record duration by status
+            RecordMetric($"Custom/ServiceOrder/Duration/{status}", duration.TotalMilliseconds);
+
+            // Record count by status
+            RecordMetric($"Custom/ServiceOrder/Count/{status}", 1);
+
+            if (servicesCount > 0)
+            {
+                RecordMetric("Custom/ServiceOrder/ServicesPerOrder", servicesCount);
+            }
+
+            _logger.LogDebug("Service order metrics recorded for status {Status}", status);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to record service order metrics");
+        }
+    }
 }

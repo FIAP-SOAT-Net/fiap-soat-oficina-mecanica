@@ -11,13 +11,27 @@ RUN apk add --no-cache curl unzip && \
     rm /tmp/newrelic-agent.tar.gz && \
     apk del curl unzip
 
+# New Relic Agent Configuration - Core settings
 ENV CORECLR_ENABLE_PROFILING=1
 ENV CORECLR_PROFILER={36032161-FFC0-4B61-B559-F6C5D41BAE5A}
 ENV CORECLR_NEWRELIC_HOME=/usr/local/newrelic-dotnet-agent
 ENV CORECLR_PROFILER_PATH=/usr/local/newrelic-dotnet-agent/libNewRelicProfiler.so
+
+# New Relic Feature Configuration - Will be overridden by K8s ConfigMap
 ENV NEW_RELIC_DISTRIBUTED_TRACING_ENABLED=true
 ENV NEW_RELIC_LOG_CONSOLE=1
 ENV NEW_RELIC_LOG_LEVEL=info
+ENV NEW_RELIC_LABELS=Environment:production
+
+# Cost Optimization - Sampling and data limits
+ENV NEW_RELIC_SPAN_EVENTS_MAX_SAMPLES_STORED=2000
+ENV NEW_RELIC_CUSTOM_EVENTS_MAX_SAMPLES_STORED=10000
+ENV NEW_RELIC_TRANSACTION_EVENTS_MAX_SAMPLES_STORED=2000
+
+# Database query optimization
+ENV NEW_RELIC_TRANSACTION_TRACER_RECORD_SQL=obfuscated
+ENV NEW_RELIC_TRANSACTION_TRACER_EXPLAIN_ENABLED=true
+ENV NEW_RELIC_TRANSACTION_TRACER_EXPLAIN_THRESHOLD=500
 
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 WORKDIR /src
