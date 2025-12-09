@@ -1,9 +1,11 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 
 namespace Fiap.Soat.SmartMechanicalWorkshop.Api.Shared.Extensions;
 
+[ExcludeFromCodeCoverage]
 public static class AuthenticationExtensions
 {
     public static IServiceCollection AddAuthenticationExtension(this IServiceCollection services, IConfiguration configuration)
