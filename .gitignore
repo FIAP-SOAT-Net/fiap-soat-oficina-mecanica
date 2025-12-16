@@ -406,3 +406,8 @@ FodyWeavers.xsd
 *.sln.iml
 
 .idea/*
+
+# Environment files with sensitive data
+.env
+.env.local
+.env.*.local

@@ -19,6 +19,33 @@ services:
     networks:
       - mechanical-workshop-dev-network
 
+  api:
+    build:
+        context: .
+    container_name: smart-mechanical-workshop-api
+    restart: unless-stopped
+    environment:
+        ASPNETCORE_ENVIRONMENT: Production
+        ConnectionStrings__DefaultConnection: "server=${DB_HOST};port=${DB_PORT};database=${MYSQL_DATABASE};user=${MYSQL_USER};password=${MYSQL_PASSWORD};SslMode=none;AllowPublicKeyRetrieval=True;"
+        Jwt__Key: ${JWT_KEY}
+        BaseUrl: ${BASE_URL}
+        Email__SmtpHost: ${SMTP_HOST}
+        Email__SmtpPort: ${SMTP_PORT}
+    ports:
+        - "5180:8080"
+    volumes:
+        - dataprotection_keys_dev:/app/keys
+    healthcheck:
+        test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+        interval: 30s
+        timeout: 10s
+        retries: 3
+    depends_on:
+        db:
+            condition: service_healthy
+    networks:
+        - mechanical-workshop-dev-network
+
   mailhog:
     image: mailhog/mailhog
     container_name: mailhog-smart-mechanical-workshop-dev
@@ -31,6 +58,7 @@ services:
 
 volumes:
   mysql_data_dev:
+  dataprotection_keys_dev:
 
 networks:
   mechanical-workshop-dev-network:

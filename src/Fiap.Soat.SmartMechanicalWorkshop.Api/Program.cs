@@ -7,6 +7,7 @@ using Fiap.Soat.SmartMechanicalWorkshop.Application.UseCases.ServiceOrders.Updat
 using Fiap.Soat.SmartMechanicalWorkshop.Domain.ValueObjects;
 using Fiap.Soat.SmartMechanicalWorkshop.Infrastructure.Data;
 using HealthChecks.UI.Client;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
@@ -38,6 +39,23 @@ _ = builder.Services.AddDbContext<AppDbContext>(options =>
     ));
 
 _ = builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("Email"));
+
+// Configure Data Protection to use persistent storage
+var dataProtectionKeysPath = builder.Configuration.GetValue<string>("DataProtection:KeysPath") ?? "/app/keys";
+if (Directory.Exists(dataProtectionKeysPath) || builder.Environment.IsProduction())
+{
+    var dataProtectionBuilder = builder.Services.AddDataProtection()
+        .PersistKeysToFileSystem(new DirectoryInfo(dataProtectionKeysPath))
+        .SetApplicationName("SmartMechanicalWorkshop");
+
+    // In production, you should configure a proper key encryption mechanism
+    // For now, we'll accept unencrypted keys in the file system
+    // For better security, consider using:
+    // - .ProtectKeysWithCertificate() with a proper certificate
+    // - Azure Key Vault: .ProtectKeysWithAzureKeyVault()
+    // - AWS KMS, etc.
+}
+
 _ = builder.Services.AddServiceExtensions();
 _ = builder.Services.AddRepositoryExtensions();
 _ = builder.Services.AddAutoMapper(typeof(AutoMapperProfiles));
@@ -55,7 +73,6 @@ _ = builder.Services.AddInterfaceAdapters();
 var app = builder.Build();
 
 _ = app.UseMiddleware<RequestLoggingEnrichmentMiddleware>();
-_ = app.UseMiddleware<NewRelicTransactionEnrichmentMiddleware>();
 
 _ = app.UseSwagger();
 _ = app.UseSwaggerUI(c =>

@@ -15,7 +15,6 @@ public static class ServiceExtensions
     {
         _ = serviceCollection.AddScoped<IEmailService, EmailService>();
         _ = serviceCollection.AddScoped<IEmailTemplateProvider, EmailTemplateProvider>();
-        _ = serviceCollection.AddSingleton<INewRelicInstrumentationService, NewRelicInstrumentationService>();
         _ = serviceCollection.AddScoped<IEmailSender, EmailSender>(opt =>
         {
             var emailSettings = opt.GetRequiredService<IOptions<EmailSettings>>().Value;

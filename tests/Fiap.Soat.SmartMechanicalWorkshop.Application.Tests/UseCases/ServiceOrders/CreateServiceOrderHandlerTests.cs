@@ -1,11 +1,9 @@
 using AutoFixture;
 using AutoMapper;
 using Fiap.Soat.SmartMechanicalWorkshop.Application.Adapters.Gateways.Repositories;
-using Fiap.Soat.SmartMechanicalWorkshop.Application.Adapters.Gateways.Services;
 using Fiap.Soat.SmartMechanicalWorkshop.Application.UseCases.ServiceOrders.Create;
 using Fiap.Soat.SmartMechanicalWorkshop.Domain.DTOs.ServiceOrders;
 using Fiap.Soat.SmartMechanicalWorkshop.Domain.Entities;
-using Fiap.Soat.SmartMechanicalWorkshop.Tests.Shared.Factories;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -22,7 +20,6 @@ public sealed class CreateServiceOrderHandlerTests
     private readonly Mock<IPersonRepository> _personRepositoryMock = new();
     private readonly Mock<IServiceOrderRepository> _repositoryMock = new();
     private readonly Mock<IVehicleRepository> _vehicleRepositoryMock = new();
-    private readonly INewRelicInstrumentationService _newRelicService = new FakeNewRelicInstrumentationService();
     private readonly Mock<ILogger<CreateServiceOrderHandler>> _loggerMock = new();
     private readonly CreateServiceOrderHandler _useCase;
 
@@ -34,7 +31,6 @@ public sealed class CreateServiceOrderHandlerTests
             _personRepositoryMock.Object,
             _availableServiceRepositoryMock.Object,
             _vehicleRepositoryMock.Object,
-            _newRelicService,
             _loggerMock.Object
         );
     }

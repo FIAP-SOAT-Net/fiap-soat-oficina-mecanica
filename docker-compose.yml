@@ -30,14 +30,14 @@ services:
       BaseUrl: ${BASE_URL}
       Email__SmtpHost: ${SMTP_HOST}
       Email__SmtpPort: ${SMTP_PORT}
-      # New Relic Configuration
+      NewRelic__Enabled: ${NEW_RELIC_ENABLED:-false}
+      NewRelic__AppName: ${NEW_RELIC_APP_NAME:-smart-mechanical-workshop-api}
       NEW_RELIC_LICENSE_KEY: ${NEW_RELIC_LICENSE_KEY}
-      NEW_RELIC_APP_NAME: ${NEW_RELIC_APP_NAME:-Smart-Mechanical-Workshop-Local}
-      NEW_RELIC_DISTRIBUTED_TRACING_ENABLED: "true"
-      NEW_RELIC_LOG_CONSOLE: "1"
-      NEW_RELIC_LOG_LEVEL: ${NEW_RELIC_LOG_LEVEL:-info}
+      NEW_RELIC_APP_NAME: ${NEW_RELIC_APP_NAME:-smart-mechanical-workshop-api}
     ports:
       - "5180:8080"
+    volumes:
+      - dataprotection_keys:/app/keys
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
       interval: 30s
@@ -61,6 +61,7 @@ services:
 
 volumes:
   mysql_data:
+  dataprotection_keys:
 
 networks:
   mechanical-workshop-network:
