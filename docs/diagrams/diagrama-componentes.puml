@@ -1,0 +1,35 @@
+@startuml
+title Diagrama de Componentes - SmartMechanicalWorkshop
+
+actor "Client\n(Browser / Mobile / Swagger)" as Client
+
+node "API\nFiap.Soat.SmartMechanicalWorkshop.Api" as API {
+  component "Controllers\n(Endpoints, Swagger/ReDoc)" as Controllers
+  component "Application\n(UseCases, DTOs)\nAutoMapper, FluentValidation" as Application
+  component "Auth\nJWT Bearer" as Auth
+  component "Logging & Telemetry\nSerilog, NewRelic" as Telemetry
+  component "HealthChecks\nAspNetCore.HealthChecks.UI" as Health
+}
+
+node "Infrastructure\nFiap.Soat.SmartMechanicalWorkshop.Infrastructure" as Infra {
+  component "Persistence\nDbContext, Repositories\nEF Core (Pomelo), Migrations" as Persistence
+  component "External Integrations\n(3rd-party clients, storage, etc.)" as ExternalIntegrations
+}
+
+database "MySQL" as MySQL
+cloud "NewRelic" as NewRelic
+rectangle "Integration Tests\n(Fiap.Soat.SmartMechanicalWorkshop.Integration.Tests)" as Tests
+
+' Flows
+Client --> Controllers : HTTP/HTTPS (REST)
+Controllers --> Application : chama casos de uso
+Application --> Persistence : repositórios / DbContext
+Persistence --> MySQL : SQL
+API --> Auth : valida JWT
+API --> Telemetry : logs & métricas
+Telemetry --> NewRelic : envio de telemetria
+API --> Health : health checks -> Persistence
+Infra --> ExternalIntegrations : integra serviços externos
+Tests ..> API : usa InternalsVisibleTo para testar internals
+
+@enduml
