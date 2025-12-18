@@ -359,3 +359,73 @@ Este projeto conta com documentação detalhada em diferentes áreas. Consulte o
 | **Kubernetes** | [k8s/README.md](k8s/README.md) | Deploy e configuração completa do Kubernetes |
 | **Kubernetes Rápido** | [k8s/deploy_instructions.md](k8s/deploy_instructions.md) | Comandos rápidos para deploy K8s |
 | **CI/CD** | [.github/workflows/README.md](.github/workflows/README.md) | Automação com GitHub Actions |
+
+## Diagrama de Componentes
+
+Descrição: o diagrama abaixo mostra os principais componentes do sistema seguindo a arquitetura em camadas (API, Application, Domain e Infrastructure). Ele ajuda a entender responsabilidades e fluxos entre controladores, casos de uso, persistência e integrações externas.
+
+Para renderizar: copie o bloco PlantUML para a extensão PlantUML do VS Code ou cole em https://www.plantuml.com/plantuml.
+
+```plantuml
+@startuml
+title Diagrama de Componentes - SmartMechanicalWorkshop
+
+actor "Client\n(Browser / Mobile / Swagger)" as Client
+
+node "API\nFiap.Soat.SmartMechanicalWorkshop.Api" as API {
+  component "Controllers\n(Endpoints, Swagger/ReDoc)" as Controllers
+  component "Application\n(UseCases, DTOs)\nAutoMapper, FluentValidation" as Application
+  component "Auth\nJWT Bearer" as Auth
+  component "Logging & Telemetry\nSerilog, NewRelic" as Telemetry
+  component "HealthChecks\nAspNetCore.HealthChecks.UI" as Health
+}
+
+node "Infrastructure\nFiap.Soat.SmartMechanicalWorkshop.Infrastructure" as Infra {
+  component "Persistence\nDbContext, Repositories\nEF Core (Pomelo), Migrations" as Persistence
+  component "External Integrations\n(3rd-party clients, storage, etc.)" as ExternalIntegrations
+}
+
+database "MySQL" as MySQL
+cloud "NewRelic" as NewRelic
+rectangle "Integration Tests\n(Fiap.Soat.SmartMechanicalWorkshop.Integration.Tests)" as Tests
+
+' Flows
+Client --> Controllers : HTTP/HTTPS (REST)
+Controllers --> Application : chama casos de uso
+Application --> Persistence : repositórios / DbContext
+Persistence --> MySQL : SQL
+API --> Auth : valida JWT
+API --> Telemetry : logs & métricas
+Telemetry --> NewRelic : envio de telemetria
+API --> Health : health checks -> Persistence
+Infra --> ExternalIntegrations : integra serviços externos
+Tests ..> API : usa InternalsVisibleTo para testar internals
+
+@enduml
+```
+
+![Diagrama de Componentes](docs/diagrams/diagrama-componentes.png)
+
+Fonte: [diagrama-componentes.puml](docs/diagrams/diagrama-componentes.puml)
+
+## RFCs — Decisões Técnicas
+
+Este projeto documenta decisões arquiteturais e operacionais relevantes através de RFCs (Request for Comments). Abaixo estão as RFCs iniciais que descrevem as escolhas de nuvem, banco de dados e estratégia de autenticação.
+
+- `docs/rfcs/0001-cloud-choice.md` — Escolha da Nuvem (AWS / EKS / RDS)
+- `docs/rfcs/0002-database-choice.md` — Escolha do Banco de Dados (MySQL / RDS)
+- `docs/rfcs/0003-auth-strategy.md` — Estratégia de Autenticação (JWT Bearer)
+
+Recomendação: antes de alterações significativas na infra (mudança de provedor de nuvem, tipo de banco ou estratégia de autenticação), abra um novo RFC e registre alternativas, impacto e plano de rollback.
+
+Template: para facilitar a criação de novas RFCs, há um template em `docs/rfcs/TEMPLATE.md` — copie e preencha seguindo o padrão de título `0004-descricao.md`.
+
+## ADRs — Architecture Decision Records
+
+Decisões arquiteturais permanentes ou de alto impacto são registradas como ADRs. Seguem as ADRs iniciais:
+
+- `docs/adr/0001-communication-pattern.md` — Padrão de Comunicação (REST público + event-driven interno)
+- `docs/adr/0002-hpa.md` — Escalonamento (HPA e métricas)
+- `docs/adr/TEMPLATE.md` — Template para novos ADRs
+
+Recomendação: antes de mudanças arquiteturais permanentes, registre uma ADR descrevendo contexto, alternativas, decisão e plano de rollback.
