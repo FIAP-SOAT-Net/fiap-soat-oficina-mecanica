@@ -1,4 +1,7 @@
+using Fiap.Soat.SmartMechanicalWorkshop.Api.Shared.Adapters;
+using Fiap.Soat.SmartMechanicalWorkshop.Api.Shared.Services;
 using Fiap.Soat.SmartMechanicalWorkshop.Application.Adapters.Gateways.Services;
+using Fiap.Soat.SmartMechanicalWorkshop.Application.Shared.Services;
 using Fiap.Soat.SmartMechanicalWorkshop.Domain.ValueObjects;
 using Fiap.Soat.SmartMechanicalWorkshop.Infrastructure.Services;
 using Fiap.Soat.SmartMechanicalWorkshop.Infrastructure.Services.Interfaces;
@@ -27,6 +30,11 @@ public static class ServiceExtensions
             };
             return new EmailSender(smtpClient);
         });
+
+        // New Relic Telemetry Services
+        _ = serviceCollection.AddSingleton<INewRelicTelemetryService, NewRelicTelemetryService>();
+        _ = serviceCollection.AddScoped<ITelemetryService, NewRelicTelemetryAdapter>();
+        _ = serviceCollection.AddSingleton<INewRelicInstrumentationService, NewRelicInstrumentationService>();
 
         return serviceCollection;
     }

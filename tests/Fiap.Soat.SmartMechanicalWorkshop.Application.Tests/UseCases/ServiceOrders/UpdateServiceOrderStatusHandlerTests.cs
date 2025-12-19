@@ -1,6 +1,7 @@
 using AutoFixture;
 using AutoMapper;
 using Fiap.Soat.SmartMechanicalWorkshop.Application.Adapters.Gateways.Repositories;
+using Fiap.Soat.SmartMechanicalWorkshop.Application.Adapters.Gateways.Services;
 using Fiap.Soat.SmartMechanicalWorkshop.Application.UseCases.ServiceOrders;
 using Fiap.Soat.SmartMechanicalWorkshop.Application.UseCases.ServiceOrders.Update;
 using Fiap.Soat.SmartMechanicalWorkshop.Domain.DTOs.ServiceOrders;
@@ -20,11 +21,12 @@ public sealed class UpdateServiceOrderStatusHandlerTests
     private readonly Mock<IServiceOrderRepository> _repositoryMock = new();
     private readonly Mock<IMediator> _mediatorMock = new();
     private readonly Mock<ILogger<UpdateServiceOrderStatusHandler>> _loggerMock = new();
+    private readonly Mock<INewRelicInstrumentationService> _newRelicInstrumentationServiceMock = new();
     private readonly UpdateServiceOrderStatusHandler _service;
 
     public UpdateServiceOrderStatusHandlerTests()
     {
-        _service = new UpdateServiceOrderStatusHandler(_mapperMock.Object, _mediatorMock.Object, _repositoryMock.Object, _loggerMock.Object);
+        _service = new UpdateServiceOrderStatusHandler(_mapperMock.Object, _mediatorMock.Object, _repositoryMock.Object, _newRelicInstrumentationServiceMock.Object, _loggerMock.Object);
     }
 
     [Fact]

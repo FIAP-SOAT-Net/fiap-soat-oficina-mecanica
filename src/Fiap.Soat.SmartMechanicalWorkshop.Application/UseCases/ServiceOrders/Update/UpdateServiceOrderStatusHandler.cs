@@ -1,5 +1,6 @@
 using AutoMapper;
 using Fiap.Soat.SmartMechanicalWorkshop.Application.Adapters.Gateways.Repositories;
+using Fiap.Soat.SmartMechanicalWorkshop.Application.Adapters.Gateways.Services;
 using Fiap.Soat.SmartMechanicalWorkshop.Application.UseCases.Quotes.Update;
 using Fiap.Soat.SmartMechanicalWorkshop.Domain.DTOs.ServiceOrders;
 using Fiap.Soat.SmartMechanicalWorkshop.Domain.Entities;
@@ -14,6 +15,7 @@ public sealed class UpdateServiceOrderStatusHandler(
     IMapper mapper,
     IMediator mediator,
     IServiceOrderRepository serviceOrderRepository,
+    INewRelicInstrumentationService newRelicService,
     ILogger<UpdateServiceOrderStatusHandler> logger)
     : IRequestHandler<UpdateServiceOrderStatusCommand, Response<ServiceOrder>>, INotificationHandler<UpdateQuoteStatusNotification>
 {
@@ -34,6 +36,21 @@ public sealed class UpdateServiceOrderStatusHandler(
             _ = await serviceOrderRepository.UpdateAsync(entity, cancellationToken);
             var response = (await serviceOrderRepository.GetDetailedAsync(request.Id, cancellationToken))!;
 
+            var duration = DateTime.UtcNow - startTime;
+
+            // Record custom event in New Relic
+            newRelicService.RecordServiceOrderEvent(
+                action: "updated",
+                orderId: response.Id,
+                status: response.Status.ToString(),
+                customerId: response.ClientId,
+                duration: duration,
+                additionalAttributes: new Dictionary<string, object>
+                {
+                    { "previousStatus", previousStatus },
+                    { "newStatus", response.Status.ToString() }
+                });
+
             logger.LogInformation(
                 "Service order {OrderId} status updated from {PreviousStatus} to {NewStatus}",
                 response.Id, previousStatus, response.Status);
@@ -44,6 +61,12 @@ public sealed class UpdateServiceOrderStatusHandler(
         catch (Exception ex)
         {
             logger.LogError(ex, "Error updating service order {OrderId} status to {Status}", request.Id, request.Status);
+            newRelicService.NoticeError(ex, new Dictionary<string, object>
+            {
+                { "orderId", request.Id.ToString() },
+                { "targetStatus", request.Status.ToString() },
+                { "operation", "UpdateServiceOrderStatus" }
+            });
             throw;
         }
     }
