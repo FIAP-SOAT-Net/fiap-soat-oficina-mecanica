@@ -1,0 +1,32 @@
+@startuml
+title Diagrama de Sequência - Autenticação (Login)
+
+actor Client as "Client\n(Browser/Mobile)"
+participant "API Controllers\nFiap.Soat.SmartMechanicalWorkshop.Api" as Controllers
+participant "Auth Service\nJWT Bearer" as Auth
+participant "Application\nUseCases" as Application
+participant "Persistence\nRepositories" as Persistence
+database "MySQL" as MySQL
+participant "Telemetry\n(Serilog/NewRelic)" as Telemetry
+
+Client -> Controllers : POST /api/auth/login\n{username, password}
+Controllers -> Application : LoginUseCase.Execute(dto)
+Application -> Persistence : UserRepository.GetByUsername(username)
+Persistence -> MySQL : SELECT user
+MySQL --> Persistence : user record
+Persistence --> Application : user entity
+Application -> Auth : ValidatePassword(user, password)
+Auth --> Application : ok / invalid
+alt senha válida
+  Application -> Auth : GenerateJWT(user claims)
+  Auth --> Application : JWT(token)
+  Application --> Controllers : LoginResult {token, expires}
+  Controllers --> Client : 200 OK {token}
+else inválido
+  Application --> Controllers : 401 Unauthorized
+  Controllers --> Client : 401 Unauthorized
+end
+
+Controllers -> Telemetry : Log("login attempt", result)
+
+@enduml
