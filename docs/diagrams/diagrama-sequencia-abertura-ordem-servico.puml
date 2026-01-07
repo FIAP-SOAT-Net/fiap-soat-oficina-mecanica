@@ -1,0 +1,28 @@
+@startuml
+title Diagrama de Sequência - Abertura de Ordem de Serviço
+
+actor Client as "Client\n(Browser/Mobile)"
+participant "API Controllers\nFiap.Soat.SmartMechanicalWorkshop.Api" as Controllers
+participant "Auth Middleware\nJWT Bearer" as Auth
+participant "Application\nUseCases" as Application
+participant "Persistence\nRepositories" as Persistence
+database "MySQL" as MySQL
+participant "Notifications\n(Events/Emails)" as Notifications
+participant "Telemetry\n(Serilog/NewRelic)" as Telemetry
+
+Client -> Controllers : POST /api/orders\n{order data} + Authorization: Bearer <token>
+Controllers -> Auth : ValidateToken(token)
+Auth --> Controllers : token claims (userId)
+Controllers -> Application : CreateOrderUseCase.Execute(dto, userId)
+Application -> Persistence : OrderRepository.Add(order)
+Persistence -> MySQL : INSERT order
+MySQL --> Persistence : created order id
+Persistence --> Application : Order entity
+Application -> Notifications : Publish(OrderCreatedEvent)
+Notifications --> Application : ack
+Application --> Controllers : 201 Created {orderId, location}
+Controllers --> Client : 201 Created
+
+Controllers -> Telemetry : Log("order.created", orderId)
+
+@enduml
