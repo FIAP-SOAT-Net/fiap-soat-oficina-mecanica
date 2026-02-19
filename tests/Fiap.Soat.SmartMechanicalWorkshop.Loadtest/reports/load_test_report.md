@@ -1,0 +1,86 @@
+> test info
+
+
+
+test suite: `nbomber_default_test_suite_name`
+
+test name: `nbomber_default_test_name`
+
+session id: `2025-12-20_17.58.76_session_e81b1df2`
+
+> scenario stats
+
+
+
+scenario: `service_order_lifecycle`
+
+  - ok count: `8011`
+
+  - fail count: `5002`
+
+  - all data: `0` MB
+
+  - duration: `00:43:38`
+
+load simulations:
+
+  - `ramping_inject`, rate: `5`, interval: `00:00:01`, during: `00:00:30`
+
+  - `inject`, rate: `5`, interval: `00:00:01`, during: `04:59:30`
+
+|step|ok stats|
+|---|---|
+|name|`global information`|
+|request count|all = `13013`, ok = `8011`, RPS = `3.1`|
+|latency (ms)|min = `7843.15`, mean = `42523.89`, max = `141111.98`, StdDev = `33410.86`|
+|latency percentile (ms)|p50 = `22249.47`, p75 = `66617.34`, p95 = `109314.05`, p99 = `123863.04`|
+
+
+|step|failures stats|
+|---|---|
+|name|`global information`|
+|request count|all = `13013`, fail = `5002`, RPS = `1.9`|
+|latency (ms)|min = `410.98`, mean = `23775.41`, max = `225631.81`, StdDev = `53003.73`|
+|latency percentile (ms)|p50 = `529.92`, p75 = `874.5`, p95 = `159121.41`, p99 = `203685.89`|
+
+
+
+
+> scenario stats
+
+
+
+scenario: `read_operations`
+
+  - ok count: `1769`
+
+  - fail count: `850`
+
+  - all data: `0` MB
+
+  - duration: `00:43:38`
+
+load simulations:
+
+  - `ramping_inject`, rate: `2`, interval: `00:00:01`, during: `00:00:30`
+
+  - `inject`, rate: `2`, interval: `00:00:02`, during: `04:59:30`
+
+|step|ok stats|
+|---|---|
+|name|`global information`|
+|request count|all = `2619`, ok = `1769`, RPS = `0.7`|
+|latency (ms)|min = `428.32`, mean = `2578.4`, max = `57840.25`, StdDev = `2525.94`|
+|latency percentile (ms)|p50 = `1416.19`, p75 = `4030.46`, p95 = `6864.9`, p99 = `8503.3`|
+
+
+|step|failures stats|
+|---|---|
+|name|`global information`|
+|request count|all = `2619`, fail = `850`, RPS = `0.3`|
+|latency (ms)|min = `412.98`, mean = `2540.33`, max = `100003.33`, StdDev = `13580.97`|
+|latency percentile (ms)|p50 = `483.58`, p75 = `602.62`, p95 = `1436.67`, p99 = `100007.94`|
+
+
+
+

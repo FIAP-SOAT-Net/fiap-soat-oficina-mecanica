@@ -1,0 +1,11 @@
+2025-12-20 14:58:33.801 -03:00 [INF] [ThreadId:6] NBomber 6.1.0 started a new session: 2025-12-20_17.58.76_session_e81b1df2
+2025-12-20 14:58:33.818 -03:00 [INF] [ThreadId:6] NBomber started as single node
+2025-12-20 14:58:33.819 -03:00 [INF] [ThreadId:6] License validation....
+2025-12-20 14:58:33.819 -03:00 [WRN] [ThreadId:6] THIS VERSION IS FREE ONLY FOR PERSONAL USE. You can't use it for an organization.
+2025-12-20 14:58:33.832 -03:00 [INF] [ThreadId:6] Reports folder: /Users/igortessaro/Documents/repos/fiap/fiap-soat-oficina-mecanica/tests/Fiap.Soat.SmartMechanicalWorkshop.Loadtest/bin/Debug/net9.0/./reports
+2025-12-20 14:58:33.832 -03:00 [INF] [ThreadId:6] Plugins: no plugins were loaded
+2025-12-20 14:58:33.832 -03:00 [INF] [ThreadId:6] Reporting sinks: no reporting sinks were loaded
+2025-12-20 14:58:33.832 -03:00 [INF] [ThreadId:6] Starting init...
+2025-12-20 14:58:33.836 -03:00 [INF] [ThreadId:6] Target scenarios: service_order_lifecycle, read_operations
+2025-12-20 14:58:33.836 -03:00 [INF] [ThreadId:6] Init finished
+2025-12-20 14:58:33.848 -03:00 [INF] [ThreadId:6] Starting bombing...

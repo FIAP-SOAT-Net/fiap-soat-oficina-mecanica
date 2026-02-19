@@ -40,6 +40,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "020 - Application Business 
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "040 - Frameworks & Drivers", "040 - Frameworks & Drivers", "{9736A949-1389-4B66-8BA7-6C8183845A75}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fiap.Soat.SmartMechanicalWorkshop.Loadtest", "tests\Fiap.Soat.SmartMechanicalWorkshop.Loadtest\Fiap.Soat.SmartMechanicalWorkshop.Loadtest.csproj", "{928A9801-6C43-4E78-93FE-AB144FB561D3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -78,6 +80,10 @@ Global
 		{08656D27-799A-4297-BE27-30371F13E650}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{08656D27-799A-4297-BE27-30371F13E650}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{08656D27-799A-4297-BE27-30371F13E650}.Release|Any CPU.Build.0 = Release|Any CPU
+		{928A9801-6C43-4E78-93FE-AB144FB561D3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{928A9801-6C43-4E78-93FE-AB144FB561D3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{928A9801-6C43-4E78-93FE-AB144FB561D3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{928A9801-6C43-4E78-93FE-AB144FB561D3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -97,5 +103,6 @@ Global
 		{9736A949-1389-4B66-8BA7-6C8183845A75} = {C6AD246A-9FEA-4262-8C40-6471838CD80A}
 		{EA088CDD-F18D-40DB-8F33-469FF29FBB7B} = {9736A949-1389-4B66-8BA7-6C8183845A75}
 		{FE36A184-D53D-2F70-1A2E-8338B7D745C0} = {9736A949-1389-4B66-8BA7-6C8183845A75}
+		{928A9801-6C43-4E78-93FE-AB144FB561D3} = {18B86828-EA31-43C1-BDC3-7B86955F1166}
 	EndGlobalSection
 EndGlobal
