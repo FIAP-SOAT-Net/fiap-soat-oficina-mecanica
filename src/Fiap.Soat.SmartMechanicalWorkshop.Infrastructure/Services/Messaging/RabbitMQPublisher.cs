@@ -1,3 +1,4 @@
+using Fiap.Soat.SmartMechanicalWorkshop.Application.Adapters.Gateways.Services;
 using Microsoft.Extensions.Options;
 using RabbitMQ.Client;
 using System.Text;
@@ -28,9 +29,17 @@ public class RabbitMQPublisher : IMessagePublisher, IDisposable
         _connection = factory.CreateConnection();
         _channel = _connection.CreateModel();
 
-        // Declare exchange if it doesn't exist
+        // Declare database events exchange
         _channel.ExchangeDeclare(
             exchange: _settings.ExchangeName,
+            type: ExchangeType.Topic,
+            durable: true,
+            autoDelete: false
+        );
+
+        // Declare notifications exchange
+        _channel.ExchangeDeclare(
+            exchange: _settings.NotificationsExchangeName,
             type: ExchangeType.Topic,
             durable: true,
             autoDelete: false
@@ -38,6 +47,11 @@ public class RabbitMQPublisher : IMessagePublisher, IDisposable
     }
 
     public Task PublishAsync<T>(string routingKey, T message, CancellationToken cancellationToken = default) where T : class
+    {
+        return PublishAsync(_settings.ExchangeName, routingKey, message, cancellationToken);
+    }
+
+    public Task PublishAsync<T>(string exchangeName, string routingKey, T message, CancellationToken cancellationToken = default) where T : class
     {
         if (_disposed)
             throw new ObjectDisposedException(nameof(RabbitMQPublisher));
@@ -51,7 +65,7 @@ public class RabbitMQPublisher : IMessagePublisher, IDisposable
         properties.Timestamp = new AmqpTimestamp(DateTimeOffset.UtcNow.ToUnixTimeSeconds());
 
         _channel.BasicPublish(
-            exchange: _settings.ExchangeName,
+            exchange: exchangeName,
             routingKey: routingKey,
             mandatory: false,
             basicProperties: properties,

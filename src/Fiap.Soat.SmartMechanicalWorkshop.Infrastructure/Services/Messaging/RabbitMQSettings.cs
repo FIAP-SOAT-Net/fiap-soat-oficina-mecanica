@@ -8,4 +8,6 @@ public class RabbitMQSettings
     public string Password { get; set; } = "guest";
     public string ExchangeName { get; set; } = "database.events.exchange";
     public string QueueName { get; set; } = "database.events";
+    public string NotificationsExchangeName { get; set; } = "notifications.exchange";
+    public string NotificationsQueueName { get; set; } = "service-order.notifications";
 }

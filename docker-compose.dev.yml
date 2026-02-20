@@ -55,6 +55,10 @@ services:
         RabbitMQ__Port: 5672
         RabbitMQ__UserName: ${RABBITMQ_USER}
         RabbitMQ__Password: ${RABBITMQ_PASSWORD}
+        RabbitMQ__ExchangeName: ${RABBITMQ_EXCHANGE_NAME:-database.events.exchange}
+        RabbitMQ__QueueName: ${RABBITMQ_QUEUE_NAME:-database.events}
+        RabbitMQ__NotificationsExchangeName: ${RABBITMQ_NOTIFICATIONS_EXCHANGE_NAME:-notifications.exchange}
+        RabbitMQ__NotificationsQueueName: ${RABBITMQ_NOTIFICATIONS_QUEUE_NAME:-service-order.notifications}
     ports:
         - "5180:8080"
     volumes:
