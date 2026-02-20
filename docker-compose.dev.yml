@@ -31,6 +31,10 @@ services:
         BaseUrl: ${BASE_URL}
         Email__SmtpHost: ${SMTP_HOST}
         Email__SmtpPort: ${SMTP_PORT}
+        RabbitMQ__HostName: rabbitmq
+        RabbitMQ__Port: 5672
+        RabbitMQ__UserName: ${RABBITMQ_USER}
+        RabbitMQ__Password: ${RABBITMQ_PASSWORD}
     ports:
         - "5180:8080"
     volumes:
@@ -42,6 +46,8 @@ services:
         retries: 3
     depends_on:
         db:
+            condition: service_healthy
+        rabbitmq:
             condition: service_healthy
     networks:
         - mechanical-workshop-dev-network
@@ -56,9 +62,32 @@ services:
     networks:
       - mechanical-workshop-dev-network
 
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    container_name: smart-mechanical-workshop-rabbitmq-dev
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq_data_dev:/var/lib/rabbitmq
+      - ./docker/rabbitmq/definitions.json:/etc/rabbitmq/definitions.json:ro
+      - ./docker/rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf:ro
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - mechanical-workshop-dev-network
+
 volumes:
   mysql_data_dev:
   dataprotection_keys_dev:
+  rabbitmq_data_dev:
 
 networks:
   mechanical-workshop-dev-network:

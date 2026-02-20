@@ -6,6 +6,8 @@ using Fiap.Soat.SmartMechanicalWorkshop.Application.Shared;
 using Fiap.Soat.SmartMechanicalWorkshop.Application.UseCases.ServiceOrders.Update;
 using Fiap.Soat.SmartMechanicalWorkshop.Domain.ValueObjects;
 using Fiap.Soat.SmartMechanicalWorkshop.Infrastructure.Data;
+using Fiap.Soat.SmartMechanicalWorkshop.Infrastructure.Interceptors;
+using Fiap.Soat.SmartMechanicalWorkshop.Infrastructure.Services.Messaging;
 using HealthChecks.UI.Client;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
@@ -30,13 +32,21 @@ _ = builder.Services.AddControllers().AddJsonOptions(options =>
     options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
 });
 
-_ = builder.Services.AddDbContext<AppDbContext>(options =>
+// Configure RabbitMQ
+_ = builder.Services.Configure<RabbitMQSettings>(builder.Configuration.GetSection("RabbitMQ"));
+_ = builder.Services.AddSingleton<IMessagePublisher, RabbitMQPublisher>();
+_ = builder.Services.AddScoped<DatabaseEventInterceptor>();
+
+_ = builder.Services.AddDbContext<AppDbContext>((serviceProvider, options) =>
+{
+    var interceptor = serviceProvider.GetRequiredService<DatabaseEventInterceptor>();
     options.UseMySql(
         builder.Configuration.GetValue<string>("ConnectionStrings:DefaultConnection"),
         ServerVersion.AutoDetect(builder.Configuration.GetValue<string>("ConnectionStrings:DefaultConnection")),
         mySqlOptions =>
             mySqlOptions.MigrationsAssembly("Fiap.Soat.SmartMechanicalWorkshop.Infrastructure")
-    ));
+    ).AddInterceptors(interceptor);
+});
 
 _ = builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("Email"));
 
