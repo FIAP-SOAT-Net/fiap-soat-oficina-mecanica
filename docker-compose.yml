@@ -184,7 +184,7 @@ services:
       MongoDB__CollectionName: ${MONGO_COLLECTION:-Surveys}
       MongoDB__UserName: ${MONGO_ROOT_USER}
       MongoDB__Password: ${MONGO_ROOT_PASSWORD}
-      NewRelic__Enabled: ${NEW_RELIC_ENABLED:-false}
+      NewRelic__Enabled: ${NEW_RELIC_ENABLED:-true}
       NewRelic__AppName: ${NEW_RELIC_APP_NAME:-smart-mechanical-workshop-survey-api}
       NEW_RELIC_LICENSE_KEY: ${NEW_RELIC_LICENSE_KEY}
       NEW_RELIC_APP_NAME: ${NEW_RELIC_APP_NAME:-smart-mechanical-workshop-survey-api}
