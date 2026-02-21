@@ -59,6 +59,10 @@ services:
         RabbitMQ__QueueName: ${RABBITMQ_QUEUE_NAME:-database.events}
         RabbitMQ__NotificationsExchangeName: ${RABBITMQ_NOTIFICATIONS_EXCHANGE_NAME:-notifications.exchange}
         RabbitMQ__NotificationsQueueName: ${RABBITMQ_NOTIFICATIONS_QUEUE_NAME:-service-order.notifications}
+        NewRelic__Enabled: ${NEW_RELIC_ENABLED:-false}
+        NewRelic__AppName: ${NEW_RELIC_APP_NAME:-smart-mechanical-workshop-api}
+        NEW_RELIC_LICENSE_KEY: ${NEW_RELIC_LICENSE_KEY}
+        NEW_RELIC_APP_NAME: ${NEW_RELIC_APP_NAME:-smart-mechanical-workshop-api}
     ports:
         - "5180:8080"
     volumes:
