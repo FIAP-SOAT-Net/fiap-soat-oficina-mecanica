@@ -50,6 +50,14 @@ services:
       BaseUrl: ${BASE_URL}
       Email__SmtpHost: ${SMTP_HOST}
       Email__SmtpPort: ${SMTP_PORT}
+      RabbitMQ__HostName: rabbitmq
+      RabbitMQ__Port: 5672
+      RabbitMQ__UserName: ${RABBITMQ_USER}
+      RabbitMQ__Password: ${RABBITMQ_PASSWORD}
+      RabbitMQ__ExchangeName: ${RABBITMQ_EXCHANGE_NAME:-database.events.exchange}
+      RabbitMQ__QueueName: ${RABBITMQ_QUEUE_NAME:-database.events}
+      RabbitMQ__NotificationsExchangeName: ${RABBITMQ_NOTIFICATIONS_EXCHANGE_NAME:-notifications.exchange}
+      RabbitMQ__NotificationsQueueName: ${RABBITMQ_NOTIFICATIONS_QUEUE_NAME:-service-order.notifications}
       NewRelic__Enabled: ${NEW_RELIC_ENABLED:-false}
       NewRelic__AppName: ${NEW_RELIC_APP_NAME:-smart-mechanical-workshop-api}
       NEW_RELIC_LICENSE_KEY: ${NEW_RELIC_LICENSE_KEY}
@@ -136,6 +144,67 @@ services:
         condition: service_healthy
     networks:
       - mechanical-workshop-network
+
+  survey-web:
+    image: ${DOCKERHUB_USERNAME}/smart-mechanical-workshop-survey-web:latest
+    container_name: smart-mechanical-workshop-survey-web
+    ports:
+      - "80:80"
+    environment:
+      - API_URL=${API_URL:-http://survey-api:8080/api/survey}
+    networks:
+      - mechanical-workshop-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+    depends_on:
+      - survey-api
+
+  # API Application (Backend)
+  survey-api:
+    image: ${DOCKERHUB_USERNAME}/smart-mechanical-workshop-survey-api:latest
+    container_name: smart-mechanical-workshop-survey-api
+    ports:
+      - "3000:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Production}
+      Logging__LogLevel__Default: ${LOG_LEVEL:-Information}
+      RabbitMQ__HostName: rabbitmq
+      RabbitMQ__Port: 5672
+      RabbitMQ__UserName: ${RABBITMQ_USER}
+      RabbitMQ__Password: ${RABBITMQ_PASSWORD}
+      RabbitMQ__ExchangeName: ${RABBITMQ_NOTIFICATIONS_EXCHANGE_NAME:-notifications.exchange}
+      RabbitMQ__QueueName: ${RABBITMQ_NOTIFICATIONS_QUEUE_NAME:-service-order.notifications}
+      MongoDB__ConnectionString: mongodb://${MONGO_ROOT_USER}:${MONGO_ROOT_PASSWORD}@mongodb:27017
+      MongoDB__DatabaseName: ${MONGO_DATABASE:-smartworkshop}
+      MongoDB__CollectionName: ${MONGO_COLLECTION:-Surveys}
+      MongoDB__UserName: ${MONGO_ROOT_USER}
+      MongoDB__Password: ${MONGO_ROOT_PASSWORD}
+      NewRelic__Enabled: ${NEW_RELIC_ENABLED:-false}
+      NewRelic__AppName: ${NEW_RELIC_APP_NAME:-smart-mechanical-workshop-survey-api}
+      NEW_RELIC_LICENSE_KEY: ${NEW_RELIC_LICENSE_KEY}
+      NEW_RELIC_APP_NAME: ${NEW_RELIC_APP_NAME:-smart-mechanical-workshop-survey-api}
+      Email__SmtpHost: ${SMTP_HOST:-mailhog}
+      Email__SmtpPort: ${SMTP_PORT:-1025}
+      Email__FromEmail: ${FROM_EMAIL:-noreply@oficiname canica.com}
+      Email__FromName: ${FROM_NAME:-Oficina Mecânica}
+      Survey__WebAppUrl: ${WEB_APP_URL:-http://localhost}
+    networks:
+      - mechanical-workshop-network
+    restart: unless-stopped
+    depends_on:
+      - mongodb
+      - rabbitmq
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
 
 volumes:
   mysql_data:
