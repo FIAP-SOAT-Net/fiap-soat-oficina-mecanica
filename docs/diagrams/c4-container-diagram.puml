@@ -1,0 +1,64 @@
+@startuml C4_Container
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+' Configurações de estilo
+LAYOUT_TOP_DOWN()
+LAYOUT_WITH_LEGEND()
+
+title Diagrama de Container (C4) - Smart Mechanical Workshop - Comunicação entre Microsserviços
+
+Person(cliente, "Cliente", "Proprietário do veículo")
+Person(funcionario, "Funcionário", "Funcionário da oficina")
+
+System_Boundary(smartWorkshop, "Smart Mechanical Workshop System") {
+    Container(api, "API Principal", "ASP.NET Core", "Gerencia clientes, veículos e ordens de serviço. Publica eventos de auditoria e notificações")
+
+    Container(surveyWeb, "Survey Web", "HTML/CSS/JS", "Interface web para clientes responderem pesquisas de satisfação")
+
+    Container(surveyApi, "Survey API", "ASP.NET Core", "Processa pesquisas de satisfação, consome eventos de ordens concluídas e envia e-mails")
+
+    Container(auditWorker, "Audit Log Worker", "ASP.NET Core Worker", "Processa eventos de auditoria e armazena logs no MongoDB")
+
+    ContainerDb(mysqlDb, "MySQL Database", "MySQL", "Armazena dados principais: clientes, veículos, ordens de serviço")
+
+    ContainerDb(mongoDb, "MongoDB", "MongoDB", "Armazena logs de auditoria (coleção Events) e pesquisas (coleção Surveys)")
+
+    ContainerQueue(rabbitmq, "RabbitMQ", "Message Broker", "Gerencia filas de mensagens para comunicação assíncrona")
+}
+
+System_Ext(mailhog, "MailHog/SMTP", "Sistema de e-mail para envio de notificações")
+
+' Relacionamentos principais
+Rel(funcionario, api, "Gerencia ordens de serviço", "HTTPS/REST")
+Rel(cliente, surveyWeb, "Acessa e responde pesquisa", "HTTPS")
+
+' Relacionamentos da API Principal
+Rel(api, mysqlDb, "Lê e escreve dados", "MySQL Protocol")
+Rel(api, rabbitmq, "Publica eventos de auditoria", "AMQP\n[fila: database.events]")
+Rel(api, rabbitmq, "Publica notificações de OS concluída", "AMQP\n[fila: service-order.notifications]")
+
+' Fluxo de Auditoria
+Rel(rabbitmq, auditWorker, "Consome eventos de auditoria", "AMQP\n[fila: database.events]")
+Rel(auditWorker, mongoDb, "Salva logs de auditoria", "MongoDB Protocol\n[coleção: Events]")
+
+' Fluxo de Pesquisa de Satisfação
+Rel(rabbitmq, surveyApi, "Consome notificações de OS", "AMQP\n[fila: service-order.notifications]")
+Rel(surveyApi, mailhog, "Envia e-mail com link da pesquisa", "SMTP")
+Rel(mailhog, cliente, "Recebe e-mail com link")
+Rel(surveyWeb, surveyApi, "Envia respostas da pesquisa", "HTTPS/REST")
+Rel(surveyApi, mongoDb, "Salva respostas da pesquisa", "MongoDB Protocol\n[coleção: Surveys]")
+
+' Notas explicativas
+note right of rabbitmq
+  **Filas RabbitMQ:**
+  - database.events (auditoria)
+  - service-order.notifications
+end note
+
+note right of mongoDb
+  **Coleções MongoDB:**
+  - Events (logs de auditoria)
+  - Surveys (pesquisas de satisfação)
+end note
+
+@enduml

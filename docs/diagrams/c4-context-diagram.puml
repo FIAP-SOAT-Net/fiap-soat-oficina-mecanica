@@ -1,0 +1,21 @@
+@startuml C4_Context
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+
+' Configurações de estilo
+LAYOUT_WITH_LEGEND()
+
+title Diagrama de Contexto (C4) - Smart Mechanical Workshop
+
+Person(cliente, "Cliente", "Proprietário do veículo que utiliza os serviços da oficina mecânica")
+Person(funcionario, "Funcionário", "Funcionário da oficina que gerencia ordens de serviço")
+
+System(smartWorkshop, "Smart Mechanical Workshop", "Sistema de gerenciamento de oficina mecânica que permite gestão de clientes, veículos, ordens de serviço e pesquisas de satisfação")
+
+System_Ext(email, "Sistema de E-mail", "Envia e-mails de notificação e pesquisa de satisfação")
+
+Rel(cliente, smartWorkshop, "Responde pesquisas de satisfação", "HTTPS")
+Rel(funcionario, smartWorkshop, "Gerencia ordens de serviço, clientes e veículos", "HTTPS")
+Rel(smartWorkshop, email, "Envia e-mails de notificação", "SMTP")
+Rel(email, cliente, "Recebe pesquisa de satisfação")
+
+@enduml

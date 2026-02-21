@@ -429,3 +429,120 @@ Decisões arquiteturais permanentes ou de alto impacto são registradas como ADR
 - `docs/adr/TEMPLATE.md` — Template para novos ADRs
 
 Recomendação: antes de mudanças arquiteturais permanentes, registre uma ADR descrevendo contexto, alternativas, decisão e plano de rollback.
+
+## Saga Pattern - Arquitetura Event-Driven com Coreografia
+
+O projeto implementa uma **arquitetura orientada a eventos (Event-Driven Architecture)** com **padrão de coreografia**, que são os fundamentos do Saga Pattern para gerenciar transações distribuídas entre microsserviços.
+
+### Componentes da Arquitetura
+
+#### 1. Message Broker (RabbitMQ)
+
+O sistema utiliza RabbitMQ como broker de mensagens para comunicação assíncrona entre serviços:
+
+- **Exchanges configurados**:
+  - `database.events.exchange` - Eventos de mudanças no banco de dados
+  - `notifications.exchange` - Notificações de ordem de serviço
+
+- **Padrão Topic Exchange**: Roteamento dinâmico baseado em routing keys (ex: `database.INSERT.ServiceOrder`)
+
+- **Persistência de mensagens**: Todas as mensagens são persistentes para garantir durabilidade
+
+#### 2. Serviços Independentes com Responsabilidades Específicas
+
+**API Principal** (`smart-mechanical-workshop-api`):
+- Expõe endpoints REST para clientes externos
+- Publica eventos de mudanças de estado via `DatabaseEventInterceptor`
+- Publica notificações quando ordens de serviço são concluídas
+
+**Audit Log Worker** (`smart-mechanical-workshop-auditlog-worker`):
+- Consome eventos de `database.events.exchange`
+- Persiste logs de auditoria no MongoDB de forma assíncrona
+- Desacoplado da API principal
+
+**Survey API** (`smart-mechanical-workshop-survey-api`):
+- Consome notificações de `notifications.exchange`
+- Envia pesquisas de satisfação quando ordens são entregues
+- Gerencia seu próprio banco de dados MongoDB
+
+#### 3. Padrão de Coreografia
+
+**Sem orquestrador central**: Cada serviço reage independentemente aos eventos que lhe interessam:
+
+```
+ServiceOrder.Delivered (API)
+    ↓
+[RabbitMQ - notifications.exchange]
+    ↓
+Survey API → Envia pesquisa de satisfação
+```
+
+**Vantagens da coreografia implementada**:
+- Alto desacoplamento entre serviços
+- Escalabilidade independente de cada serviço
+- Tolerância a falhas (se um serviço cai, outros continuam funcionando)
+- Fácil adição de novos consumidores sem modificar publicadores
+
+#### 4. State Machine para Ordens de Serviço
+
+O domínio implementa uma máquina de estados robusta para gerenciar o ciclo de vida das ordens de serviço:
+
+**Estados disponíveis**:
+1. `Received` → `UnderDiagnosis`
+2. `UnderDiagnosis` → `WaitingApproval` ou `Cancelled`
+3. `WaitingApproval` → `InProgress`, `Rejected` ou `Cancelled`
+4. `InProgress` → `Completed`
+5. `Completed` → `Delivered`
+6. `Cancelled` → `Delivered`
+7. `Rejected` → `WaitingApproval`
+
+**Implementação**:
+- Padrão State Pattern com classes de estado específicas (ex: `ReceivedState`, `InProgressState`)
+- Validação de transições permitidas em cada estado
+- Exceções de domínio para transições inválidas
+
+#### 5. Event Sourcing Parcial
+
+O sistema mantém histórico de eventos de ordens de serviço:
+
+- Tabela `service_order_events` registra todas as mudanças de estado
+- Handler `CreateEventLogHandler` persiste eventos automaticamente
+- Permite auditoria e análise de fluxo de trabalho
+
+### Fluxo de Exemplo: Conclusão de Ordem de Serviço
+
+```
+1. Cliente aprova orçamento via API
+   ↓
+2. Quote.Status → Approved
+   ↓
+3. UpdateQuoteStatusHandler publica UpdateQuoteStatusNotification
+   ↓
+4. ReplacementStockHandler atualiza estoque (reage ao evento)
+   ↓
+5. ServiceOrder.Status → InProgress
+   ↓
+6. ... (trabalho executado) ...
+   ↓
+7. ServiceOrder.Status → Completed → Delivered
+   ↓
+8. NotifyServiceOrderCompletionHandler publica mensagem no RabbitMQ
+   ↓
+9. Survey API consome mensagem
+   ↓
+10. E-mail de pesquisa enviado ao cliente
+```
+
+### Benefícios da Implementação
+
+✅ **Desacoplamento**: Serviços não conhecem uns aos outros diretamente
+
+✅ **Escalabilidade**: Cada serviço pode escalar independentemente conforme demanda
+
+✅ **Resiliência**: Falha em um serviço não afeta os demais
+
+✅ **Extensibilidade**: Novos serviços podem ser adicionados apenas consumindo eventos existentes
+
+✅ **Rastreabilidade**: Todos os eventos são auditados e armazenados
+
+✅ **Separação de concerns**: Cada serviço tem sua própria base de dados e responsabilidade
